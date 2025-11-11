@@ -1,9 +1,12 @@
 from rest_framework import serializers
-from .models import Author, Book, Borrower
+from .models import(Author, 
+        Book, 
+        Borrower)
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 
+# -------------LOGIN SERIALIZER -------------
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -16,7 +19,6 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError("Invalid username or password")
 
-        # Generate JWT tokens manually
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
@@ -24,13 +26,13 @@ class LoginSerializer(serializers.Serializer):
             'username': user.username,
         }
 
-
+# -------------AUTHOR SERIALIZER -------------
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Author
         fields = '__all__'
 
-
+# -------------BOOK SERIALIZER -------------
 class BookSerializer(serializers.ModelSerializer):
     author    = AuthorSerializer(read_only=True)
     author_id = serializers.PrimaryKeyRelatedField(
@@ -41,7 +43,7 @@ class BookSerializer(serializers.ModelSerializer):
         model = Book
         fields = ['id', 'title', 'author', 'author_id', 'published_date', 'available_copies']
 
-
+# -------------BORROWER SERIALIZER -------------
 class BorrowerSerializer(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
     book_id = serializers.PrimaryKeyRelatedField(
